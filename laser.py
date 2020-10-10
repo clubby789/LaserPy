@@ -54,7 +54,7 @@ class LaserStack:
         self.contents[self.addr - 1].append(a)
 
     def rUp(self):
-        a = self.contents[self.addr].pop()
+        a = self.contents[self.addr].pop(0)
         self.contents[self.addr].insert(0, a)
 
     def rDn(self):
@@ -112,6 +112,15 @@ class LaserMachine:
         xMov, yMov = self.direction[0], self.direction[1]
         self.pc[0] += xMov
         self.pc[1] += yMov
+        if self.pc[0] == self.width:
+            self.pc[0] = 0
+        elif self.pc[0] == -1:
+            self.pc[0] = self.width - 1
+
+        if self.pc[1] == self.height:
+            self.pc[1] = 0
+        elif self.pc[1] == -1:
+            self.pc[1] = self.height - 1
         if self.verbose:
             self.debug()
         return True
