@@ -13,3 +13,6 @@ I'll leave the full documentation there, and only note down here currently imple
 `( ) c r R ! ~ p P o O b n B`
 ### Binary Operations
 `+ - × ÷ * g l = & | %`
+
+## Implementation Notes
+Any numeric strings pushed into memory will be automatically cast to integers
