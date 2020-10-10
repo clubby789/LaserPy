@@ -4,8 +4,12 @@ I'll leave the full documentation there, and only note down here currently imple
 
 ## Currently Implemented
 ### Mirrors
-`\ / v ^ < >`
+`\ / v ^ < > ⌞ ⌜ ⌟ ⌝`
 ### Strings
 `"` (String Mode)
 
 ``` ` ``` (Raw Mode)
+### Unary Operations
+`( ) c r R ! ~ p P o O b n B`
+### Binary Operations
+`+ - × ÷ * g l = & | %`
