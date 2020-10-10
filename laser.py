@@ -27,6 +27,8 @@ class LaserStack:
         return self.contents[self.addr].pop()
 
     def push(self, item):
+        if type(item) == str and item.isnumeric():
+            item = int(item)
         self.contents[self.addr].append(item)
 
     def peek(self):
@@ -54,12 +56,17 @@ class LaserStack:
         self.contents[self.addr - 1].append(a)
 
     def rUp(self):
+        print("rup")
         a = self.contents[self.addr].pop(0)
-        self.contents[self.addr].insert(0, a)
+        self.contents[self.addr].append(a)
 
     def rDn(self):
         a = self.contents[self.addr].pop()
-        self.contents[self.addr - 1].append(a)
+        self.contents[self.addr].insert(0, a)
+
+    def repl(self):
+        a = list(self.contents[self.addr])
+        self.contents.insert(self.addr, a)
 
     def __repr__(self):
         return repr(self.contents[self.addr][::-1])
@@ -91,12 +98,16 @@ class LaserMachine:
             self.debug()
 
     def debug(self):
+        """
         print(f"PC: {self.pc} -"
               f"DIRECTION: {self.direction} -"
               f"STACK: {self.memory} -"
               f"MODE: {self.parse_mode}"
               )
-
+        """
+        print(f"addr: {self.memory.addr} - "
+              f"stack: {self.memory}"
+              )
     def do_step(self):
         i = self.fetch_item()
         if self.verbose:
@@ -148,11 +159,11 @@ class LaserMachine:
         elif i == "c":  # CRD
             val = len(self.memory)
             self.memory.push(val)
-        elif i == "r" or i == "R":  # RPL
-            # Should function the same for replicating a stack
-            # or a value
+        elif i == "r":  # RPL
             val = self.memory.peek()
             self.memory.push(val)
+        elif i == "R":  # SRPL
+            self.memory.repl()
         elif i == "!":  # NBF
             pass
         elif i == "~":  # NBW
@@ -214,7 +225,7 @@ class LaserMachine:
             b = self.memory.pop()
             val = int(b < a)
             self.memory.push(val)
-        elif i == "u":  # EQL
+        elif i == "=":  # EQL
             a = self.memory.pop()
             b = self.memory.pop()
             val = int(b == a)
@@ -222,13 +233,13 @@ class LaserMachine:
         elif i == "&":  # AND
             val = int(self.memory.pop & self.memory.pop())
             self.memory.push(val)
-        elif i == "&":  # OR
+        elif i == "|":  # OR
             val = int(self.memory.pop | self.memory.pop())
             self.memory.push(val)
-        elif i == "&":  # MOD
+        elif i == "%":  # MOD
             a = self.memory.pop()
             b = self.memory.pop()
-            val = b % a
+            val = int(b) % int(a)
             self.memory.push(val)
 
         # STACK OPERATIONS #
@@ -237,6 +248,10 @@ class LaserMachine:
             self.memory.sUp()
         elif i == "D":  # SDN
             self.memory.sDown()
+        elif i == "u":  # RUP
+            self.memory.rUp()
+        elif i == "d":  # RDN
+            self.memory.rDn()
         elif i == "s":  # SWUP
             self.memory.swUp()
         elif i == "w":  # SWDN
