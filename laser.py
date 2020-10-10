@@ -56,7 +56,6 @@ class LaserStack:
         self.contents[self.addr - 1].append(a)
 
     def rUp(self):
-        print("rup")
         a = self.contents[self.addr].pop(0)
         self.contents[self.addr].append(a)
 
