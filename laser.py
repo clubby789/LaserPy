@@ -13,6 +13,7 @@ RAW         = 2
 CONDITIONALS = "⌞⌜⌟⌝"
 MIRRORS = "\\/>v<^" + CONDITIONALS
 UNARY = "()crR!~pPoObnB"
+BINARY = "+-×÷*gl=&|%"
 
 class LaserStack:
     contents = []
@@ -32,7 +33,7 @@ class LaserStack:
         return self.contents[-1]
 
     def __repr__(self):
-        return repr(self.contents)
+        return repr(self.contents[::-1])
 
     def __len__(self):
         return len(self.contents)
@@ -88,51 +89,104 @@ class LaserMachine:
             self.parse_mode = STRING
         elif i == '`':
             self.parse_mode = RAW
+
+        # UNARY OPERATIONS #
+
         elif i == "(": # DEC
-            val = self.contents.pop()
+            val = self.memory.pop()
             val -= 1
-            self.contents.push(val)
+            self.memory.push(val)
         elif i == ")": # INC
-            val = self.contents.pop()
+            val = self.memory.pop()
             val += 1
-            self.contents.push(val)
+            self.memory.push(val)
         elif i == "c": # CRD
-            val = len(self.contents)
-            self.contents.push(val)
+            val = len(self.memory)
+            self.memory.push(val)
         elif i == "r" or i == "R": # RPL
             # Should function the same for replicating a stack
             # or a value
-            val = self.contents.peek()
-            self.contents.push(val)
+            val = self.memory.peek()
+            self.memory.push(val)
         elif i == "!": # NBF
             pass
         elif i == "~": # NBW
-            val = self.contents.pop()
+            val = self.memory.pop()
             val = ~val
-            self.contents.push(val)
+            self.memory.push(val)
         elif i == "p" or i == "P": # POP
-            val = self.contents.pop()
+            val = self.memory.pop()
         elif i == "o": # POPO
-            val = self.contents.pop()
+            val = self.memory.pop()
             print(val)
         elif i == "O": # POPS
             while len(self.memory) > 0:
                 print(self.memory.pop(), end=' ')
             print('')
         elif i == "b": # CS
-            val = self.contents.pop()
+            val = self.memory.pop()
             val = chr(val)
-            self.contents.push(val)
+            self.memory.push(val)
         elif i == "n": # CN
-            val = self.contents.pop()
+            val = self.memory.pop()
             for c in val[::-1]:
-                self.contents.push(ord(c))
+                self.memory.push(ord(c))
         elif i == "B": # CSS
             nums = []
             while type(self.memory.peek()) == int:
-                nums.append(self.contents.pop())
+                nums.append(self.memory.pop())
             val = ''.join([chr(x) for x in nums])
-            self.contents.push(val)
+            self.memory.push(val)
+
+        # BINARY OPERATIONS #
+
+        elif i == "+": # ADD
+            val = self.memory.pop() + self.memory.pop()
+            self.memory.push(val)
+        elif i == "-": # SUB
+            val = self.memory.pop() - self.memory.pop()
+            self.memory.push(val)
+        elif i == "×": # MUL
+            val = self.memory.pop() * self.memory.pop()
+            self.memory.push(val)
+        elif i == "÷": # DIV
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = b / a
+            self.memory.push(val)
+        elif i == "*": # EXP
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = b ** a
+            self.memory.push(val)
+        elif i == "g": # GRT
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = int(b > a)
+            self.memory.push(val)
+        elif i == "l": # LSS
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = int(b < a)
+            self.memory.push(val)
+        elif i == "u": # EQL
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = int(b == a)
+            self.memory.push(val)
+        elif i == "&": # AND
+            val = int(self.memory.pop & self.memory.pop())
+            self.memory.push(val)
+        elif i == "&": # OR
+            val = int(self.memory.pop | self.memory.pop())
+            self.memory.push(val)
+        elif i == "&": # MOD
+            a = self.memory.pop()
+            b = self.memory.pop()
+            val = b % a
+            self.memory.push(val)
+
+
         elif i == "#":
             while len(self.memory) > 0:
                 print(self.memory.pop(), end=' ')
@@ -171,7 +225,7 @@ class LaserMachine:
             if self.direction == WEST : self.direction = NORTH
             elif self.direction == EAST: self.direction  = NORTH
         elif mirror in CONDITIONALS:
-            if self.contents.peek() == 0:
+            if self.memory.peek() == 0:
                 if mirror == "⌞":
                     if   self.direction == NORTH: self.direction = EAST
                     elif self.direction == WEST : self.direction = NORTH
