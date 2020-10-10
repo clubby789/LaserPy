@@ -12,6 +12,7 @@ RAW         = 2
 
 CONDITIONALS = "⌞⌜⌟⌝"
 MIRRORS = "\\/>v<^" + CONDITIONALS
+UNARY = "()crR!~pPoObnB"
 
 class LaserStack:
     contents = []
@@ -87,6 +88,51 @@ class LaserMachine:
             self.parse_mode = STRING
         elif i == '`':
             self.parse_mode = RAW
+        elif i == "(": # DEC
+            val = self.contents.pop()
+            val -= 1
+            self.contents.push(val)
+        elif i == ")": # INC
+            val = self.contents.pop()
+            val += 1
+            self.contents.push(val)
+        elif i == "c": # CRD
+            val = len(self.contents)
+            self.contents.push(val)
+        elif i == "r" or i == "R": # RPL
+            # Should function the same for replicating a stack
+            # or a value
+            val = self.contents.peek()
+            self.contents.push(val)
+        elif i == "!": # NBF
+            pass
+        elif i == "~": # NBW
+            val = self.contents.pop()
+            val = ~val
+            self.contents.push(val)
+        elif i == "p" or i == "P": # POP
+            val = self.contents.pop()
+        elif i == "o": # POPO
+            val = self.contents.pop()
+            print(val)
+        elif i == "O": # POPS
+            while len(self.memory) > 0:
+                print(self.memory.pop(), end=' ')
+            print('')
+        elif i == "b": # CS
+            val = self.contents.pop()
+            val = chr(val)
+            self.contents.push(val)
+        elif i == "n": # CN
+            val = self.contents.pop()
+            for c in val[::-1]:
+                self.contents.push(ord(c))
+        elif i == "B": # CSS
+            nums = []
+            while type(self.memory.peek()) == int:
+                nums.append(self.contents.pop())
+            val = ''.join([chr(x) for x in nums])
+            self.contents.push(val)
         elif i == "#":
             while len(self.memory) > 0:
                 print(self.memory.pop(), end=' ')
