@@ -10,18 +10,24 @@ INSTRUCTION = 0
 STRING      = 1
 RAW         = 2
 
-MIRRORS = "\\/>v<^"
+CONDITIONALS = "⌞⌜⌟⌝"
+MIRRORS = "\\/>v<^" + CONDITIONALS
 
 class LaserStack:
     contents = []
 
     def pop(self):
+        if len(self.contents) == 0:
+            print("Error: pop from empty stack")
+            exit(-1)
         return self.contents.pop()
 
     def push(self, item):
         self.contents.append(item)
 
     def peek(self):
+        if len(self.contents) == 0:
+            return 0
         return self.contents[-1]
 
     def __repr__(self):
@@ -118,6 +124,28 @@ class LaserMachine:
         elif mirror == "^":
             if self.direction == WEST : self.direction = NORTH
             elif self.direction == EAST: self.direction  = NORTH
+        elif mirror in CONDITIONALS:
+            if self.contents.peek() == 0:
+                if mirror == "⌞":
+                    if   self.direction == NORTH: self.direction = EAST
+                    elif self.direction == WEST : self.direction = NORTH
+                    elif self.direction == SOUTH: self.direction = EAST
+                    elif self.direction == EAST : self.direction = NORTH
+                elif mirror == "⌜":
+                    if   self.direction == NORTH: self.direction = EAST
+                    elif self.direction == WEST : self.direction = SOUTH
+                    elif self.direction == SOUTH: self.direction = EAST
+                    elif self.direction == EAST : self.direction = SOUTH
+                elif mirror == "⌟":
+                    if   self.direction == NORTH: self.direction = WEST
+                    elif self.direction == WEST : self.direction = NORTH
+                    elif self.direction == SOUTH: self.direction = WEST
+                    elif self.direction == EAST : self.direction = NORTH
+                elif mirror == "⌝":
+                    if   self.direction == NORTH: self.direction = WEST
+                    elif self.direction == WEST : self.direction = SOUTH
+                    elif self.direction == SOUTH: self.direction = WEST
+                    elif self.direction == EAST : self.direction = SOUTH
 
 
 parser = argparse.ArgumentParser(description='Run a LaserLang program.')
