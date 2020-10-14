@@ -1,0 +1,5 @@
+{"../programs/factors.lsr 100": "1 2 4 5 10 20 25 50 100 \n",
+ "../programs/factors.lsr 1234": "1 2 617 1234 \n",
+ "../programs/hello.lsr": "Hello world \n",
+ "../programs/sort.lsr 1 5 4 3 2 1": "5 4 3 2 1 1 \n"
+}

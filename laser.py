@@ -1,10 +1,10 @@
 import argparse
+import operator
 
 NORTH = [0, 1]
 SOUTH = [0, -1]
 EAST = [1, 0]
 WEST = [-1, 0]
-
 
 INSTRUCTION = 0
 STRING = 1
@@ -15,10 +15,21 @@ MIRRORS = "\\/>v<^" + CONDITIONALS
 UNARY = "()crR!~pPoObnB"
 BINARY = "+-×÷*gl=&|%"
 
+binary_ops = {"+": operator.add,
+              "-": operator.sub,
+              "×": operator.mul,
+              "÷": operator.truediv,
+              "*": operator.pow,
+              "g": lambda a, b: int(b > a),
+              "l": lambda a, b: int(b < a),
+              "=": lambda a, b: int(a == b),
+              "&": operator.and_,
+              "|": operator.or_,
+              "%": lambda a, b: b % a}
 
 class LaserStack:
-    contents = [[]]
-    addr = 0
+    self.contents = [[]]
+    self.addr = 0
 
     def pop(self):
         if len(self.contents[self.addr]) == 0:
@@ -27,7 +38,7 @@ class LaserStack:
         return self.contents[self.addr].pop()
 
     def push(self, item):
-        if type(item) == str and item.isnumeric():
+        if isinstance(item, str) and item.isnumeric():
             item = int(item)
         self.contents[self.addr].append(item)
 
@@ -40,7 +51,7 @@ class LaserStack:
         self.addr += 1
         if self.addr == len(self.contents):
             # Top of the stack
-            self.contents.append(list())
+            self.contents.append([])
 
     def sDown(self):
         self.addr -= 1
@@ -48,7 +59,7 @@ class LaserStack:
     def swUp(self):
         a = self.contents[self.addr].pop()
         if self.addr == len(self.contents) - 1:
-            self.contents.append(list())
+            self.contents.append([])
         self.contents[self.addr + 1].append(a)
 
     def swDown(self):
@@ -84,7 +95,7 @@ class LaserMachine:
         self.verbose = verbose
         lines = prog.split('\n')
         self.prog = []
-        self.width = len(max(lines, key=len))
+        self.width = max(map(len, lines))
         self.height = len(lines)
         for line in lines:
             self.prog.append(list(line.ljust(self.width)))
@@ -195,52 +206,10 @@ class LaserMachine:
 
         # BINARY OPERATIONS #
 
-        elif i == "+":  # ADD
-            val = self.memory.pop() + self.memory.pop()
-            self.memory.push(val)
-        elif i == "-":  # SUB
-            val = self.memory.pop() - self.memory.pop()
-            self.memory.push(val)
-        elif i == "×":  # MUL
-            val = self.memory.pop() * self.memory.pop()
-            self.memory.push(val)
-        elif i == "÷":  # DIV
+        elif i in binary_ops:
             a = self.memory.pop()
             b = self.memory.pop()
-            val = b / a
-            self.memory.push(val)
-        elif i == "*":  # EXP
-            a = self.memory.pop()
-            b = self.memory.pop()
-            val = b ** a
-            self.memory.push(val)
-        elif i == "g":  # GRT
-            a = self.memory.pop()
-            b = self.memory.pop()
-            val = int(b > a)
-            self.memory.push(val)
-        elif i == "l":  # LSS
-            a = self.memory.pop()
-            b = self.memory.pop()
-            val = int(b < a)
-            self.memory.push(val)
-        elif i == "=":  # EQL
-            a = self.memory.pop()
-            b = self.memory.pop()
-            val = int(b == a)
-            self.memory.push(val)
-        elif i == "&":  # AND
-            val = int(self.memory.pop & self.memory.pop())
-            self.memory.push(val)
-        elif i == "|":  # OR
-            val = int(self.memory.pop | self.memory.pop())
-            self.memory.push(val)
-        elif i == "%":  # MOD
-            a = self.memory.pop()
-            b = self.memory.pop()
-            val = int(b) % int(a)
-            self.memory.push(val)
-
+            self.memory.push(binary_ops[i](a, b))
         # STACK OPERATIONS #
 
         elif i == "U":  # SUP
