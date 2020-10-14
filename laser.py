@@ -28,8 +28,8 @@ binary_ops = {"+": operator.add,
               "%": lambda a, b: b % a}
 
 class LaserStack:
-    self.contents = [[]]
-    self.addr = 0
+    contents = [[]]
+    addr = 0
 
     def pop(self):
         if len(self.contents[self.addr]) == 0:
