@@ -27,6 +27,17 @@ binary_ops = {"+": operator.add,
               "|": operator.or_,
               "%": lambda a, b: b % a}
 
+mirror_ops = {"\\": [WEST, NORTH, EAST, SOUTH],
+              "/": [EAST, SOUTH, WEST, NORTH],
+              ">": [EAST, WEST, EAST, EAST],
+              "v": [NORTH, SOUTH, SOUTH, SOUTH],
+              "<": [WEST, WEST, WEST, EAST],
+              "^": [NORTH, NORTH, SOUTH, NORTH],
+              "⌞": [EAST, NORTH, EAST, NORTH],
+              "⌜": [EAST, SOUTH, EAST, SOUTH],
+              "⌟": [WEST, NORTH, WEST, NORTH],
+              "⌝": [WEST, SOUTH, WEST, SOUTH]}
+
 class LaserStack:
     contents = [[]]
     addr = 0
@@ -245,50 +256,12 @@ class LaserMachine:
             self.current_string += i
 
     def switch_direction(self, mirror):
-        if mirror == "\\":
-            if self.direction == NORTH: self.direction = WEST
-            elif self.direction == WEST: self.direction = NORTH
-            elif self.direction == SOUTH: self.direction = EAST
-            elif self.direction == EAST: self.direction = SOUTH
-        elif mirror == "/":
-            if   self.direction == NORTH: self.direction = EAST
-            elif self.direction == WEST: self.direction = SOUTH
-            elif self.direction == SOUTH: self.direction = WEST
-            elif self.direction == EAST: self.direction = NORTH
-        elif mirror == ">":
-            if   self.direction == NORTH: self.direction = EAST
-            elif self.direction == SOUTH: self.direction = EAST
-        elif mirror == "v":
-            if self.direction == WEST: self.direction = SOUTH
-            elif self.direction == EAST: self.direction = SOUTH
-        elif mirror == "<":
-            if   self.direction == NORTH: self.direction = WEST
-            elif self.direction == SOUTH: self.direction = WEST
-        elif mirror == "^":
-            if self.direction == WEST: self.direction = NORTH
-            elif self.direction == EAST: self.direction = NORTH
-        elif mirror in CONDITIONALS:
-            if self.memory.peek() == 0:
-                if mirror == "⌞":
-                    if   self.direction == NORTH: self.direction = EAST
-                    elif self.direction == WEST: self.direction = NORTH
-                    elif self.direction == SOUTH: self.direction = EAST
-                    elif self.direction == EAST: self.direction = NORTH
-                elif mirror == "⌜":
-                    if   self.direction == NORTH: self.direction = EAST
-                    elif self.direction == WEST: self.direction = SOUTH
-                    elif self.direction == SOUTH: self.direction = EAST
-                    elif self.direction == EAST: self.direction = SOUTH
-                elif mirror == "⌟":
-                    if   self.direction == NORTH: self.direction = WEST
-                    elif self.direction == WEST: self.direction = NORTH
-                    elif self.direction == SOUTH: self.direction = WEST
-                    elif self.direction == EAST: self.direction = NORTH
-                elif mirror == "⌝":
-                    if   self.direction == NORTH: self.direction = WEST
-                    elif self.direction == WEST: self.direction = SOUTH
-                    elif self.direction == SOUTH: self.direction = WEST
-                    elif self.direction == EAST: self.direction = SOUTH
+        if mirror in CONDITIONALS:
+            if self.memory.peek() != 0:
+                return None
+
+        directions = [NORTH, WEST, SOUTH, EAST]
+        self.direction = mirror_ops[mirror][directions.index(self.direction)]
 
 
 parser = argparse.ArgumentParser(description='Run a LaserLang program.')
