@@ -59,12 +59,12 @@ binary_ops = {"+": operator.add,
               "|": operator.or_,
               "%": lambda a, b: b % a}
 
-stack_ops = {"U": lambda self: self.memory.sUp(),
-             "D": lambda self: self.memory.sDown(),
-             "u": lambda self: self.memory.rUp(),
-             "d": lambda self: self.memory.rDn(),
-             "s": lambda self: self.memory.swUp(),
-             "w": lambda self: self.memory.swDown()}
+stack_ops = {"U": lambda self: self.memory.s_up(),
+             "D": lambda self: self.memory.s_down(),
+             "u": lambda self: self.memory.r_up(),
+             "d": lambda self: self.memory.r_down(),
+             "s": lambda self: self.memory.sw_up(),
+             "w": lambda self: self.memory.sw_down()}
 
 mirror_ops = {"\\": [WEST, NORTH, EAST, SOUTH],
               "/": [EAST, SOUTH, WEST, NORTH],
