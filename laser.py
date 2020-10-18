@@ -2,6 +2,7 @@
 import argparse
 import operator
 import sys
+import math
 
 NORTH = [0, 1]
 SOUTH = [0, -1]
@@ -44,7 +45,7 @@ nullary_ops = {"c": lambda self: self.memory.push(len(self.memory)),
 unary_ops = {"(": lambda x: x - 1,
              ")": lambda x: x + 1,
              "~": operator.inv,
-             "!": operator.not_,
+             "!": lambda x: (1 << int((math.log(x)/math.log(2))+1)) - 1 ^ x,
              "b": chr}
 
 binary_ops = {"+": operator.add,
