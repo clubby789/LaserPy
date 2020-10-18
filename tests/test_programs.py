@@ -3,7 +3,8 @@ import json
 import pytest
 from . import prog_test, run_prog
 # flake8: noqa
-# Have to ignore the linter here because of the verbose string.
+# pylint: disable=C0303
+# Have to ignore the linters here because of the verbose string.
 # Maybe could move expected output out to a file.
 
 @pytest.mark.parametrize('prog', json.load(open("tests/programs.json")))
@@ -13,8 +14,9 @@ def test_programs(prog):
 
 
 def test_verbose():
-    with open('tests/programs.json') as f:
-        data = json.load(f)
+    """Test verbose mode"""
+    with open('tests/programs.json') as file:
+        data = json.load(file)
     helloworld = data[0]
     stdout = run_prog(helloworld['path'], '', verbose=True)
     assert stdout == r"""\   /\ 
