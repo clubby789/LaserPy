@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Empty Stack Pop",
+        "path": "programs/errors/emptypop.lsr",
+        "args": null,
+        "expected": "Error: pop from empty stack"
+    },
+    {
+        "name": "Unknown Instruction",
+        "path": "programs/errors/unknowninstr.lsr",
+        "args": null,
+        "expected": "Error: Instruction Unknown"
+    }
+]
