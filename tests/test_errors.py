@@ -1,8 +1,8 @@
 """Test some LL programs to see if the output is correct"""
 import json
+import subprocess
 import pytest
 from . import prog_test
-import subprocess
 
 
 @pytest.mark.parametrize('prog', json.load(open("tests/errors.json")))
