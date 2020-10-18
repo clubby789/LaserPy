@@ -1,5 +1,7 @@
+"""A Python implementation of LaserLang"""
 import argparse
 import operator
+import sys
 
 NORTH = [0, 1]
 SOUTH = [0, -1]
@@ -17,7 +19,10 @@ UNARY = "()!~b"
 BINARY = "+-×÷*gl=&|%"
 
 
-def _B(self):
+def stack_string(self):
+    """
+    Casts a sequence of integers from the top of the stack to a string
+    """
     chars = []
     while isinstance(self.memory.peek(), int):
         chars.append(chr(self.memory.pop()))
@@ -33,7 +38,7 @@ nullary_ops = {"c": lambda self: self.memory.push(len(self.memory)),
                "O": lambda self: self.memory.printself(),
                "n": lambda self: [self.memory.push(ord(c))
                                   for c in self.memory.pop()[::-1]],
-               "B": _B,
+               "B": stack_string,
                " ": lambda _: None}
 
 unary_ops = {"(": lambda x: x - 1,
@@ -74,58 +79,73 @@ mirror_ops = {"\\": [WEST, NORTH, EAST, SOUTH],
 
 
 class LaserStack:
+    """
+    Performs the stack operations required by Laser
+    """
     contents = [[]]
     addr = 0
 
     def pop(self):
+        """Pops the top element off the current stack"""
         if len(self.contents[self.addr]) == 0:
             print("Error: pop from empty stack")
-            exit(-1)
+            sys.exit(-1)
         return self.contents[self.addr].pop()
 
     def push(self, item):
+        """Pushes an element to the current stack, casting to an int
+        if numeric"""
         if isinstance(item, str) and item.isnumeric():
             item = int(item)
         self.contents[self.addr].append(item)
 
     def peek(self):
+        """Returns the top element from the current stack"""
         if len(self.contents[self.addr]) == 0:
             return 0
         return self.contents[self.addr][-1]
 
-    def sUp(self):
+    def s_up(self):
+        """Moves up 1 stack"""
         self.addr += 1
         if self.addr == len(self.contents):
             # Top of the stack
             self.contents.append([])
 
-    def sDown(self):
+    def s_down(self):
+        """Moves down 1 stack"""
         self.addr -= 1
 
-    def swUp(self):
-        a = self.contents[self.addr].pop()
+    def sw_up(self):
+        """Moves the top element off the current stack to the next stack up"""
+        temp = self.contents[self.addr].pop()
         if self.addr == len(self.contents) - 1:
             self.contents.append([])
-        self.contents[self.addr + 1].append(a)
+        self.contents[self.addr + 1].append(temp)
 
-    def swDown(self):
-        a = self.contents[self.addr].pop()
-        self.contents[self.addr - 1].append(a)
+    def sw_down(self):
+        """Moves the top element of the current stack to the next stack down"""
+        temp = self.contents[self.addr].pop()
+        self.contents[self.addr - 1].append(temp)
 
-    def rUp(self):
-        a = self.contents[self.addr].pop(0)
-        self.contents[self.addr].append(a)
+    def r_up(self):
+        """Moves the bottom element of the current stack to the top"""
+        temp = self.contents[self.addr].pop(0)
+        self.contents[self.addr].append(temp)
 
-    def rDn(self):
-        a = self.contents[self.addr].pop()
-        self.contents[self.addr].insert(0, a)
+    def r_down(self):
+        """Moves the top element of the current stack to the bottom"""
+        temp = self.contents[self.addr].pop()
+        self.contents[self.addr].insert(0, temp)
 
     def repl(self):
-        a = list(self.contents[self.addr])
-        self.contents.insert(self.addr, a)
+        """Replicate the current stack"""
+        temp = list(self.contents[self.addr])
+        self.contents.insert(self.addr, temp)
 
     def printself(self):
-        while len(self):
+        """Prints the current stack"""
+        while len(self) > 0:
             print(self.pop(), end=' ')
         print()
 
@@ -137,12 +157,14 @@ class LaserStack:
 
 
 class LaserMachine:
-    direction = [1, 0]
-    memory = LaserStack()
-    parse_mode = INSTRUCTION
-    current_string = ""
-
-    def __init__(self, prog, verbose=False, init=[]):
+    """A Laser 'VM' for intepreting a program"""
+    # pylint: disable=too-many-instance-attributes
+    # There's a lot to keep track of
+    def __init__(self, prog, verbose=False, init=None):
+        self.direction = EAST
+        self.memory = LaserStack()
+        self.parse_mode = INSTRUCTION
+        self.current_string = ""
         self.verbose = verbose
         lines = prog.split('\n')
         self.prog = []
@@ -150,27 +172,23 @@ class LaserMachine:
         self.height = len(lines)
         for line in lines:
             self.prog.append(list(line.ljust(self.width)))
-        self.pc = [0, self.height - 1]
-        for var in init[::-1]:
-            self.memory.push(var)
+        self.program_counter = [0, self.height - 1]
+        if isinstance(init, list):
+            for var in init[::-1]:
+                self.memory.push(var)
         if verbose:
             for line in self.prog:
                 print(''.join(line))
             self.debug()
 
     def debug(self):
-        """
-        print(f"PC: {self.pc} -"
-              f"DIRECTION: {self.direction} -"
-              f"STACK: {self.memory} -"
-              f"MODE: {self.parse_mode}"
-              )
-        """
+        """Print some debug info"""
         print(f"addr: {self.memory.addr} - "
               f"stack: {self.memory}"
               )
 
     def do_step(self):
+        """Performs a single step of the machine"""
         i = self.fetch_item()
         if self.verbose:
             print(i)
@@ -182,27 +200,32 @@ class LaserMachine:
             self.process_instruction(i)
         elif self.parse_mode == STRING:
             self.process_string(i)
-        xMov, yMov = self.direction[0], self.direction[1]
-        self.pc[0] += xMov
-        self.pc[1] += yMov
-        if self.pc[0] == self.width:
-            self.pc[0] = 0
-        elif self.pc[0] == -1:
-            self.pc[0] = self.width - 1
+        x_mov, y_mov = self.direction[0], self.direction[1]
+        self.program_counter[0] += x_mov
+        self.program_counter[1] += y_mov
+        if self.program_counter[0] == self.width:
+            self.program_counter[0] = 0
+        elif self.program_counter[0] == -1:
+            self.program_counter[0] = self.width - 1
 
-        if self.pc[1] == self.height:
-            self.pc[1] = 0
-        elif self.pc[1] == -1:
-            self.pc[1] = self.height - 1
+        if self.program_counter[1] == self.height:
+            self.program_counter[1] = 0
+        elif self.program_counter[1] == -1:
+            self.program_counter[1] = self.height - 1
         if self.verbose:
             self.debug()
         return True
 
     def fetch_item(self):
-        x, y = self.pc[0], self.height - self.pc[1] - 1
-        return self.prog[y][x]
+        """Fetches the character at the current PC"""
+        x_pos = self.program_counter[0]
+        y_pos = self.height - self.program_counter[1] - 1
+        return self.prog[y_pos][x_pos]
 
     def process_instruction(self, i):
+        """
+        Handle an instruction character
+        """
         if i == '"':
             self.parse_mode = STRING
         elif i == '`':
@@ -214,14 +237,14 @@ class LaserMachine:
 
         # UNARY OPERATIONS #
         elif i in unary_ops:
-            a = self.memory.pop()
-            self.memory.push(unary_ops[i](a))
+            temp = self.memory.pop()
+            self.memory.push(unary_ops[i](temp))
 
         # BINARY OPERATIONS #
         elif i in binary_ops:
-            a = self.memory.pop()
-            b = self.memory.pop()
-            self.memory.push(binary_ops[i](a, b))
+            temp_a = self.memory.pop()
+            temp_b = self.memory.pop()
+            self.memory.push(binary_ops[i](temp_a, temp_b))
 
         # STACK OPERATIONS #
         elif i in stack_ops:
@@ -230,13 +253,14 @@ class LaserMachine:
         # TERMINATE
         elif i == "#":
             self.memory.printself()
-            exit()
+            sys.exit(0)
         else:
             print(f"Instruction {i} unknown!")
-            exit()
+            sys.exit(-1)
 
     def process_string(self, i):
-        if i == '"' or i == '`':
+        """Process input while in string mode"""
+        if i in ('"', '`'):
             self.memory.push(self.current_string)
             self.current_string = ""
             self.parse_mode = INSTRUCTION
@@ -244,9 +268,10 @@ class LaserMachine:
             self.current_string += i
 
     def switch_direction(self, mirror):
+        """Process a mirror and switch direction"""
         if mirror in CONDITIONALS:
             if self.memory.peek() != 0:
-                return 0
+                return
 
         directions = [NORTH, WEST, SOUTH, EAST]
         self.direction = mirror_ops[mirror][directions.index(self.direction)]
@@ -261,8 +286,8 @@ parser.add_argument("input", help="Items to initialize stack with",
 args = parser.parse_args()
 
 with open(args.program, 'r') as f:
-    prog = f.read()
+    program = f.read()
 
-LM = LaserMachine(prog, verbose=args.verbose, init=args.input)
+LM = LaserMachine(program, verbose=args.verbose, init=args.input)
 while LM.do_step():
     pass
