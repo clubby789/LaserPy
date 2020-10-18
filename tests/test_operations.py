@@ -4,7 +4,7 @@ import pytest  # noqa
 from . import prog_test
 
 
-@pytest.mark.parametrize('prog', json.load(open("tests/programs.json")))
-def test_programs(prog):
+@pytest.mark.parametrize('prog', json.load(open("tests/operations.json")))
+def test_operations(prog):
     """Iterate over and test programs"""
     prog_test(prog)
