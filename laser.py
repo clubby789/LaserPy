@@ -12,8 +12,32 @@ RAW = 2
 
 CONDITIONALS = "⌞⌜⌟⌝"
 MIRRORS = "\\/>v<^" + CONDITIONALS
-UNARY = "()crR!~pPoObnB"
+NULLARY = "crRpPoOnB "
+UNARY = "()!~b"
 BINARY = "+-×÷*gl=&|%"
+
+def _B(self):
+    chars = []
+    while isinstance(self.memory.peek(), int):
+        chars.append(chr(self.memory.pop()))
+    self.memory.push(''.join(chars))
+
+nullary_ops = {"c": lambda self: self.memory.push(len(self.memory)),
+               "r": lambda self: self.memory.push(self.memory.peek()),
+               "R": lambda self: self.memory.repl(),
+               "p": lambda self: self.memory.pop(),
+               "P": lambda self: self.memory.pop(),
+               "o": lambda self: print(self.memory.pop()),
+               "O": lambda self: self.memory.printself(),
+               "n": lambda self: [self.memory.push(ord(c)) for c in self.memory.pop()[::-1]],
+               "B": _B,
+               " ": lambda _: None}
+
+unary_ops = {"(": lambda x: x - 1,
+             ")": lambda x: x + 1,
+             "~": operator.inv,
+             "!": operator.not_,
+             "b": chr}
 
 binary_ops = {"+": operator.add,
               "-": operator.sub,
@@ -26,6 +50,13 @@ binary_ops = {"+": operator.add,
               "&": operator.and_,
               "|": operator.or_,
               "%": lambda a, b: b % a}
+
+stack_ops = {"U": lambda self: self.memory.sUp(),
+             "D": lambda self: self.memory.sDown(),
+             "u": lambda self: self.memory.rUp(),
+             "d": lambda self: self.memory.rDn(),
+             "s": lambda self: self.memory.swUp(),
+             "w": lambda self: self.memory.swDown()}
 
 mirror_ops = {"\\": [WEST, NORTH, EAST, SOUTH],
               "/": [EAST, SOUTH, WEST, NORTH],
@@ -89,12 +120,16 @@ class LaserStack:
         a = list(self.contents[self.addr])
         self.contents.insert(self.addr, a)
 
+    def printself(self):
+        while len(self):
+            print(self.pop(), end=' ')
+        print()
+
     def __repr__(self):
         return repr(self.contents[self.addr][::-1])
 
     def __len__(self):
         return len(self.contents[self.addr])
-
 
 class LaserMachine:
     direction = [1, 0]
@@ -167,81 +202,28 @@ class LaserMachine:
         elif i == '`':
             self.parse_mode = RAW
 
-        # UNARY OPERATIONS #
+        # NULLARY OPERATIONS (NO ARGUMENTS) #
+        elif i in nullary_ops:
+            nullary_ops[i](self)
 
-        elif i == "(":  # DEC
-            val = self.memory.pop()
-            val -= 1
-            self.memory.push(val)
-        elif i == ")":  # INC
-            val = self.memory.pop()
-            val += 1
-            self.memory.push(val)
-        elif i == "c":  # CRD
-            val = len(self.memory)
-            self.memory.push(val)
-        elif i == "r":  # RPL
-            val = self.memory.peek()
-            self.memory.push(val)
-        elif i == "R":  # SRPL
-            self.memory.repl()
-        elif i == "!":  # NBF
-            pass
-        elif i == "~":  # NBW
-            val = self.memory.pop()
-            val = ~val
-            self.memory.push(val)
-        elif i == "p" or i == "P":  # POP
-            val = self.memory.pop()
-        elif i == "o":  # POPO
-            val = self.memory.pop()
-            print(val)
-        elif i == "O":  # POPS
-            while len(self.memory) > 0:
-                print(self.memory.pop(), end=' ')
-            print('')
-        elif i == "b":  # CS
-            val = self.memory.pop()
-            val = chr(val)
-            self.memory.push(val)
-        elif i == "n":  # CN
-            val = self.memory.pop()
-            for c in val[::-1]:
-                self.memory.push(ord(c))
-        elif i == "B":  # CSS
-            nums = []
-            while type(self.memory.peek()) == int:
-                nums.append(self.memory.pop())
-            val = ''.join([chr(x) for x in nums])
-            self.memory.push(val)
+        # UNARY OPERATIONS #
+        elif i in unary_ops:
+            a = self.memory.pop()
+            self.memory.push(unary_ops[i](a))
 
         # BINARY OPERATIONS #
-
         elif i in binary_ops:
             a = self.memory.pop()
             b = self.memory.pop()
             self.memory.push(binary_ops[i](a, b))
+
         # STACK OPERATIONS #
+        elif i in stack_ops:
+            stack_ops[i](self)
 
-        elif i == "U":  # SUP
-            self.memory.sUp()
-        elif i == "D":  # SDN
-            self.memory.sDown()
-        elif i == "u":  # RUP
-            self.memory.rUp()
-        elif i == "d":  # RDN
-            self.memory.rDn()
-        elif i == "s":  # SWUP
-            self.memory.swUp()
-        elif i == "w":  # SWDN
-            self.memory.swDown()
-
-        elif i == " ":  # NOP
-            pass
+        # TERMINATE
         elif i == "#":
-            while len(self.memory) > 0:
-                print(self.memory.pop(), end=' ')
-            print('')
+            self.memory.printself()
             exit()
         else:
             print(f"Instruction {i} unknown!")
@@ -258,7 +240,7 @@ class LaserMachine:
     def switch_direction(self, mirror):
         if mirror in CONDITIONALS:
             if self.memory.peek() != 0:
-                return None
+                return 0
 
         directions = [NORTH, WEST, SOUTH, EAST]
         self.direction = mirror_ops[mirror][directions.index(self.direction)]
