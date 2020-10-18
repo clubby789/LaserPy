@@ -1,0 +1,45 @@
+[
+    {
+        "name": "Inc/Decrement",
+        "path": "programs/operations/incdec.lsr",
+        "args": "1 1 1",
+        "expected": "1\n2\n0\n\n"
+    },
+    {
+        "name": "Cardinality",
+        "path": "programs/operations/cardinality.lsr",
+        "args": "1 1 1",
+        "expected": "3\n2\n1\n\n"
+    },
+    {
+        "name": "Replicate",
+        "path": "programs/operations/replicate.lsr",
+        "args": "3 2 1",
+        "expected": "3 3 2 1 \n\n"
+    },
+    {
+        "name": "Stack Replicate",
+        "path": "programs/operations/stack_repl.lsr",
+        "args": "test",
+        "expected": "test \ntest \n\n"
+    },
+    {
+        "name": "Nots",
+        "path": "programs/operations/nots.lsr",
+        "args": "1 1",
+        "expected": "0\n-2\n\n"
+    },
+    {
+        "name": "Pop",
+        "path": "programs/operations/pop.lsr",
+        "args": "1 2 3",
+        "expected": "2 3 \n"
+    },
+    {
+        "name": "Cast",
+        "path": "programs/operations/casts.lsr",
+        "args": "abc",
+        "expected": "97 98 99 \nb\nbbc \n"
+    }
+
+]
