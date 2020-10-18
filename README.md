@@ -19,3 +19,8 @@ I'll leave the full documentation there, and only note down here currently imple
 ## Implementation Notes
 Any numeric strings pushed into memory will be automatically cast to integers
 
+
+## Contributing
+Before commiting, I'd reccomend running `ln -s ../../scripts/pre-commit.sh ./.git/hooks/pre-commit`.
+This will run some test scripts before accepting a commit, which will save some time if there's any issues.
+
