@@ -1,4 +1,4 @@
-name: Lint
+name: Tests
 
 on:
   push:
@@ -7,10 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -21,12 +19,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Analysing the code with pylint
+    - name: Run pytest tests
       run: |
-        pylint `find . -type f -name "*.py"|xargs`
-    - name: Analyse with Flake8
-      uses: suo/flake8-github-action@v1
-      with:
-        checkName: 'build'   # NOTE: this needs to be the same as the job name
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        pytest
