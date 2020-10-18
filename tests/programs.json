@@ -22,5 +22,11 @@
         "path": "programs/sort.lsr",
         "args": "1 5 4 3 2 1",
         "expected": "5 4 3 2 1 1 \n"
+    },
+    {
+        "name": "Raw string mode",
+        "path": "programs/raw.lsr",
+        "args": null,
+        "expected": "this /program is \\full ><^v of mirrors! \n"
     }    
 ]
