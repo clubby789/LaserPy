@@ -16,11 +16,13 @@ NULLARY = "crRpPoOnB "
 UNARY = "()!~b"
 BINARY = "+-×÷*gl=&|%"
 
+
 def _B(self):
     chars = []
     while isinstance(self.memory.peek(), int):
         chars.append(chr(self.memory.pop()))
     self.memory.push(''.join(chars))
+
 
 nullary_ops = {"c": lambda self: self.memory.push(len(self.memory)),
                "r": lambda self: self.memory.push(self.memory.peek()),
@@ -29,7 +31,8 @@ nullary_ops = {"c": lambda self: self.memory.push(len(self.memory)),
                "P": lambda self: self.memory.pop(),
                "o": lambda self: print(self.memory.pop()),
                "O": lambda self: self.memory.printself(),
-               "n": lambda self: [self.memory.push(ord(c)) for c in self.memory.pop()[::-1]],
+               "n": lambda self: [self.memory.push(ord(c))
+                                  for c in self.memory.pop()[::-1]],
                "B": _B,
                " ": lambda _: None}
 
@@ -68,6 +71,7 @@ mirror_ops = {"\\": [WEST, NORTH, EAST, SOUTH],
               "⌜": [EAST, SOUTH, EAST, SOUTH],
               "⌟": [WEST, NORTH, WEST, NORTH],
               "⌝": [WEST, SOUTH, WEST, SOUTH]}
+
 
 class LaserStack:
     contents = [[]]
@@ -131,6 +135,7 @@ class LaserStack:
     def __len__(self):
         return len(self.contents[self.addr])
 
+
 class LaserMachine:
     direction = [1, 0]
     memory = LaserStack()
@@ -164,6 +169,7 @@ class LaserMachine:
         print(f"addr: {self.memory.addr} - "
               f"stack: {self.memory}"
               )
+
     def do_step(self):
         i = self.fetch_item()
         if self.verbose:
