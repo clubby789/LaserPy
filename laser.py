@@ -25,7 +25,7 @@ def stack_string(self):
     Casts a sequence of integers from the top of the stack to a string
     """
     chars = []
-    while isinstance(self.memory.peek(), int):
+    while isinstance(self.memory.peek(), int) and len(self.memory) > 0:
         chars.append(chr(self.memory.pop()))
     self.memory.push(''.join(chars))
 
