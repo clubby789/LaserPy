@@ -28,5 +28,17 @@
         "path": "programs/raw.lsr",
         "args": null,
         "expected": "this /program is \\full ><^v of mirrors! \n"
-    }    
+    },
+    {
+        "name": "Countdown Horizontal",
+        "path": "programs/countdown1.lsr",
+        "args": "5",
+        "expected": "5\n4\n3\n2\n1\n0 \n"
+    },
+    {
+        "name": "Countdown Vertical",
+        "path": "programs/countdown2.lsr",
+        "args": "5",
+        "expected": "5\n4\n3\n2\n1\n0 \n"
+    } 
 ]
